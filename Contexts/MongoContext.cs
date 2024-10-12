@@ -4,41 +4,54 @@
 
 namespace Mongorize.Contexts
 {
+    using Microsoft.Extensions.Options;
+    using MongoDB.Bson;
     using MongoDB.Driver;
+    using MongoDB.Driver.Core.Events;
+    using Mongorize.Attributes;
+    using Mongorize.Contexts.Interfaces;
     using Mongorize.Entities;
+    using Mongorize.Settings;
 
     /// <summary>
     /// Represents the base abstract MongoDb context that initializes and provide
     /// the way to connect to the database.
     /// </summary>
-    public abstract class MongoContext
+    public abstract class MongoContext : IMongoContext
     {
         private readonly IMongoDatabase database;
-        private readonly IMongoClient mongoClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoContext"/> class.
         /// </summary>
-        /// <param name="connectionString">The mongodb connection string.</param>
-        /// <param name="databaseName">The name of the database.</param>
-        public MongoContext(string connectionString, string databaseName)
+        /// <param name="options">Options containing the <see cref="MongoSettings"/> configuration.</param>
+        public MongoContext(IOptions<MongoSettings> options)
         {
-            this.mongoClient = new MongoClient(connectionString);
-            if (this.mongoClient != null)
+            var mongoConnectionUrl = new MongoUrl(options.Value.Connection);
+            var mongoClientSettings = MongoClientSettings.FromUrl(mongoConnectionUrl);
+
+            if (options.Value.LogQueries)
             {
-                this.database = this.mongoClient.GetDatabase(databaseName);
+                mongoClientSettings.ClusterConfigurator = cb =>
+                {
+                    cb.Subscribe<CommandStartedEvent>(e =>
+                    {
+                        Console.WriteLine($"Db command: {e.CommandName} - {e.Command.ToJson()}");
+                    });
+                };
             }
+
+            var mongoClient = new MongoClient(mongoClientSettings);
+            this.database = mongoClient.GetDatabase(options.Value.DatabaseName);
         }
 
-        /// <summary>
-        /// Given a collection name returns the collection related to the parameter entity.
-        /// </summary>
-        /// <typeparam name="T">The type to work with that should be of type <see cref="BaseEntity"/>.</typeparam>
-        /// <param name="collectionName">The name of the collection.</param>
-        /// <returns>The <see cref="IMongoCollection{T}"/>.</returns>
-        public IMongoCollection<T> GetCollection<T>(string collectionName)
+        /// <inheritdoc/>
+        public IMongoCollection<T> GetCollection<T>()
             where T : BaseEntity
         {
+            string collectionName = (typeof(T).GetCustomAttributes(typeof(BsonCollectionAttribute), true)
+                .FirstOrDefault() as BsonCollectionAttribute).CollectionName;
+
             return this.database.GetCollection<T>(collectionName);
         }
     }
