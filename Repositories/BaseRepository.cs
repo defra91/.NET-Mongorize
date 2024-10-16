@@ -4,11 +4,15 @@
 
 namespace Mongorize.Repositories
 {
+    using System.Collections.Generic;
+    using System.Linq.Expressions;
     using MongoDB.Bson;
     using MongoDB.Driver;
     using Mongorize.Contexts.Interfaces;
     using Mongorize.Entities;
+    using Mongorize.Models;
     using Mongorize.Repositories.Interfaces;
+    using Mongorize.Utils;
 
     /// <summary>
     /// Implementation of the <see cref="IRepository{TEntity}"/> interface.
@@ -37,6 +41,37 @@ namespace Mongorize.Repositories
                 .FindAsync(filter, cancellationToken: cToken)
                 .Result
                 .FirstOrDefaultAsync(cancellationToken: cToken);
+        }
+
+        /// <inheritdoc />
+        public Task<List<TEntity>> GetList(QueryOptions<TEntity> options, CancellationToken cToken)
+        {
+            var combinedFilter = options.Filters != null
+                ? ExpressionUtils.CombineAndExpression(options.Filters.GetExpressions())
+                : _ => true;
+
+            IFindFluent<TEntity, TEntity> find = this.dbCollection.Find(combinedFilter);
+
+            if (options.Pagination != null)
+            {
+                find = find
+                    .Limit(options.Pagination.ItemsPerPage)
+                    .Skip((options.Pagination.Page - 1) * options.Pagination.ItemsPerPage);
+            }
+
+            foreach (var (sortBy, direction) in options.SortCriteria)
+            {
+                find = direction == Models.Enums.ESortByDirection.Ascending
+                    ? find.SortBy(sortBy)
+                    : find.SortByDescending(sortBy);
+            }
+
+            if (options.IncludeProjections.Count > 0 || options.ExcludeProjections.Count > 0)
+            {
+                find = Utils.MongoUtils.SetProjections<TEntity>(find, options.IncludeProjections, options.ExcludeProjections);
+            }
+
+            return find.ToListAsync(cToken);
         }
     }
 }

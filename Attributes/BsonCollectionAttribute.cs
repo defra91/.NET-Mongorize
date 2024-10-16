@@ -8,18 +8,16 @@ namespace Mongorize.Attributes;
 /// Attribute that indicates that an entity is a Bson collection.
 /// In this way we can threat the entity as a mongodb collection.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of the <see cref="BsonCollectionAttribute" /> class
+/// with its required collection name.
+/// </remarks>
+/// <param name="collectionName">The name of the collection.</param>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public class BsonCollectionAttribute : Attribute
+public class BsonCollectionAttribute(string collectionName)
+    : Attribute
 {
-    private readonly string collectionName;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="BsonCollectionAttribute" /> class
-    /// with its required collection name.
-    /// </summary>
-    /// <param name="collectionName">The name of the collection.</param>
-    public BsonCollectionAttribute(string collectionName)
-        => this.collectionName = collectionName;
+    private readonly string collectionName = collectionName;
 
     /// <summary>
     /// Gets the collection name.
