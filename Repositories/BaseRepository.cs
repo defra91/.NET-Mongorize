@@ -11,6 +11,7 @@ namespace Mongorize.Repositories
     using Mongorize.Contexts.Interfaces;
     using Mongorize.Entities;
     using Mongorize.Models;
+    using Mongorize.Models.Enums;
     using Mongorize.Repositories.Interfaces;
     using Mongorize.Utils;
 
@@ -46,25 +47,18 @@ namespace Mongorize.Repositories
         /// <inheritdoc />
         public Task<List<TEntity>> GetList(QueryOptions<TEntity> options, CancellationToken cToken)
         {
-            var combinedFilter = options.Filters != null
-                ? ExpressionUtils.CombineAndExpression(options.Filters.GetExpressions())
-                : _ => true;
+            var combinedFilter = GetCombinedFilter(options);
 
             IFindFluent<TEntity, TEntity> find = this.dbCollection.Find(combinedFilter);
 
-            if (options.Pagination != null)
+            if (options.Pagination is { ItemsPerPage: > 0, Page: > 0 })
             {
                 find = find
                     .Limit(options.Pagination.ItemsPerPage)
                     .Skip((options.Pagination.Page - 1) * options.Pagination.ItemsPerPage);
             }
 
-            foreach (var (sortBy, direction) in options.SortCriteria)
-            {
-                find = direction == Models.Enums.ESortByDirection.Ascending
-                    ? find.SortBy(sortBy)
-                    : find.SortByDescending(sortBy);
-            }
+            find = ApplySorting(find, options.SortCriteria);
 
             if (options.IncludeProjections.Count > 0 || options.ExcludeProjections.Count > 0)
             {
@@ -77,9 +71,7 @@ namespace Mongorize.Repositories
         /// <inheritdoc />
         public Task<long> Count(QueryFiltersOptions<TEntity> options, CancellationToken cToken)
         {
-            var combinedFilter = options.Filters != null
-                ? ExpressionUtils.CombineAndExpression(options.Filters.GetExpressions())
-                : _ => true;
+            var combinedFilter = GetCombinedFilter(options);
 
             return this.dbCollection.CountDocumentsAsync(combinedFilter, null, cToken);
         }
@@ -129,9 +121,12 @@ namespace Mongorize.Repositories
         Dictionary<Expression<Func<TEntity, object>>, object> updateDict,
         CancellationToken cToken)
         {
-            Expression<Func<TEntity, bool>> combinedFilter = options.Filters != null
-                ? ExpressionUtils.CombineAndExpression(options.Filters.GetExpressions())
-                : _ => true;
+            if (updateDict?.Any() != true)
+            {
+                throw new ArgumentException("No fields provided for update.", nameof(updateDict));
+            }
+
+            var combinedFilter = GetCombinedFilter(options);
 
             UpdateDefinitionBuilder<TEntity> updateDefinitionBuilder = Builders<TEntity>.Update;
 
@@ -154,18 +149,10 @@ namespace Mongorize.Repositories
          /// <inheritdoc />
         public Task<TEntity> FindOne(QueryOptions<TEntity> options, CancellationToken cToken)
         {
-            Expression<Func<TEntity, bool>> combinedFilter = options.Filters != null
-                ? ExpressionUtils.CombineAndExpression(options.Filters.GetExpressions())
-                : _ => true;
+            var combinedFilter = GetCombinedFilter(options);
 
             var find = this.dbCollection.Find(combinedFilter);
-
-            foreach (var (sortBy, direction) in options.SortCriteria)
-            {
-                find = direction == Models.Enums.ESortByDirection.Ascending
-                    ? find.SortBy(sortBy)
-                    : find.SortByDescending(sortBy);
-            }
+            find = ApplySorting(find, options.SortCriteria);
 
             if (options.IncludeProjections.Count > 0 || options.ExcludeProjections.Count > 0)
             {
@@ -185,9 +172,7 @@ namespace Mongorize.Repositories
         /// <inheritdoc />
         public async Task<long> RemoveMany(QueryFiltersOptions<TEntity> options, CancellationToken cToken)
         {
-            Expression<Func<TEntity, bool>> combinedFilter = options.Filters != null
-                ? ExpressionUtils.CombineAndExpression(options.Filters.GetExpressions())
-                : _ => true;
+            var combinedFilter = GetCombinedFilter(options);
 
             DeleteResult deleteResult = await this.dbCollection.DeleteManyAsync(combinedFilter, cToken);
             return deleteResult.DeletedCount;
@@ -205,6 +190,27 @@ namespace Mongorize.Repositories
             {
                 entity.CreatedAt = entity.CreatedAt == null ? DateTime.Now : entity.CreatedAt;
             }
+        }
+
+        private static Expression<Func<TEntity, bool>> GetCombinedFilter(QueryFiltersOptions<TEntity> options)
+        {
+            return options.Filters != null
+                ? ExpressionUtils.CombineAndExpression(options.Filters.GetExpressions())
+                : _ => true;
+        }
+
+        private static IFindFluent<TEntity, TEntity> ApplySorting(
+            IFindFluent<TEntity, TEntity> find,
+            List<(Expression<Func<TEntity, object>> SortBy, ESortByDirection Direction)> sortCriteria)
+        {
+            foreach (var (sortBy, direction) in sortCriteria)
+            {
+                find = direction == ESortByDirection.Ascending
+                    ? find.SortBy(sortBy)
+                    : find.SortByDescending(sortBy);
+            }
+
+            return find;
         }
     }
 }
