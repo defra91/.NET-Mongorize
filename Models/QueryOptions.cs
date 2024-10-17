@@ -7,25 +7,19 @@ namespace Mongorize.Models;
 using System.Linq.Expressions;
 using Mongorize.Entities;
 using Mongorize.Models.Enums;
-using Mongorize.Models.Interfaces;
 
 /// <summary>
 /// Represents an object container for bulding a query related to the
 /// provided type param.
 /// </summary>
 /// <typeparam name="TEntity">The entity to work with.</typeparam>
-public class QueryOptions<TEntity>
+public class QueryOptions<TEntity> : QueryFiltersOptions<TEntity>
     where TEntity : BaseEntity
 {
     /// <summary>
     /// Gets or sets the pagination object.
     /// </summary>
     public Pagination Pagination { get; set; }
-
-    /// <summary>
-    /// Gets or sets the filters object.
-    /// </summary>
-    public IFilter<TEntity> Filters { get; set; }
 
     /// <summary>
     /// Gets or sets the list of projections inclusions.

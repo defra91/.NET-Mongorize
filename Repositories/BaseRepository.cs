@@ -73,5 +73,138 @@ namespace Mongorize.Repositories
 
             return find.ToListAsync(cToken);
         }
+
+        /// <inheritdoc />
+        public Task<long> Count(QueryFiltersOptions<TEntity> options, CancellationToken cToken)
+        {
+            var combinedFilter = options.Filters != null
+                ? ExpressionUtils.CombineAndExpression(options.Filters.GetExpressions())
+                : _ => true;
+
+            return this.dbCollection.CountDocumentsAsync(combinedFilter, null, cToken);
+        }
+
+        /// <inheritdoc />
+        public async Task<TEntity> Create(TEntity entity, CancellationToken cToken)
+        {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(typeof(TEntity).Name + " object is null");
+            }
+
+            this.BeforeWrite(entity, true);
+            await this.dbCollection.InsertOneAsync(entity, null, cToken);
+            return entity;
+        }
+
+        /// <inheritdoc/>
+        public async Task<List<TEntity>> CreateRange(List<TEntity> list, CancellationToken cToken)
+        {
+            if (list?.Count <= 0)
+            {
+                throw new ArgumentNullException(typeof(TEntity).Name + " list is empty");
+            }
+
+            foreach (var t in list)
+            {
+                this.BeforeWrite(t, true);
+            }
+
+            await this.dbCollection.InsertManyAsync(list, null, cToken);
+            return list;
+        }
+
+        /// <inheritdoc/>
+        public async Task<TEntity> Update(TEntity entity, CancellationToken cToken)
+        {
+            this.BeforeWrite(entity, newRecord: false);
+            await this.dbCollection.ReplaceOneAsync(x => x.Id == entity.Id, entity, new ReplaceOptions() { }, cToken);
+
+            return await this.GetById(entity.Id, cToken);
+        }
+
+        /// <inheritdoc/>
+        public async Task<long> UpdateMultipleFieldsAsync(
+        QueryFiltersOptions<TEntity> options,
+        Dictionary<Expression<Func<TEntity, object>>, object> updateDict,
+        CancellationToken cToken)
+        {
+            Expression<Func<TEntity, bool>> combinedFilter = options.Filters != null
+                ? ExpressionUtils.CombineAndExpression(options.Filters.GetExpressions())
+                : _ => true;
+
+            UpdateDefinitionBuilder<TEntity> updateDefinitionBuilder = Builders<TEntity>.Update;
+
+            // Build a list of updates and then combine
+            List<UpdateDefinition<TEntity>> updates = new List<UpdateDefinition<TEntity>>();
+            foreach (var keyPairValue in updateDict)
+            {
+                updates.Add(updateDefinitionBuilder.Set(keyPairValue.Key, keyPairValue.Value));
+            }
+
+            updates.Add(updateDefinitionBuilder.Set(x => x.UpdatedAt, DateTime.Now)); // Set updated at field to datetime now.
+
+            UpdateDefinition<TEntity> combinedUpdate = updateDefinitionBuilder.Combine(updates);
+
+            UpdateResult updateResult = await this.dbCollection.UpdateManyAsync(combinedFilter, combinedUpdate, null, cToken);
+
+            return updateResult.ModifiedCount;
+        }
+
+         /// <inheritdoc />
+        public Task<TEntity> FindOne(QueryOptions<TEntity> options, CancellationToken cToken)
+        {
+            Expression<Func<TEntity, bool>> combinedFilter = options.Filters != null
+                ? ExpressionUtils.CombineAndExpression(options.Filters.GetExpressions())
+                : _ => true;
+
+            var find = this.dbCollection.Find(combinedFilter);
+
+            foreach (var (sortBy, direction) in options.SortCriteria)
+            {
+                find = direction == Models.Enums.ESortByDirection.Ascending
+                    ? find.SortBy(sortBy)
+                    : find.SortByDescending(sortBy);
+            }
+
+            if (options.IncludeProjections.Count > 0 || options.ExcludeProjections.Count > 0)
+            {
+                find = Utils.MongoUtils.SetProjections<TEntity>(find, options.IncludeProjections, options.ExcludeProjections);
+            }
+
+            return find.FirstOrDefaultAsync(cToken);
+        }
+
+        /// <inheritdoc />
+        public async Task<long> RemoveById(string id, CancellationToken cToken)
+        {
+            DeleteResult deleteResult = await this.dbCollection.DeleteOneAsync(x => x.Id == id, cToken);
+            return deleteResult.DeletedCount;
+        }
+
+        /// <inheritdoc />
+        public async Task<long> RemoveMany(QueryFiltersOptions<TEntity> options, CancellationToken cToken)
+        {
+            Expression<Func<TEntity, bool>> combinedFilter = options.Filters != null
+                ? ExpressionUtils.CombineAndExpression(options.Filters.GetExpressions())
+                : _ => true;
+
+            DeleteResult deleteResult = await this.dbCollection.DeleteManyAsync(combinedFilter, cToken);
+            return deleteResult.DeletedCount;
+        }
+
+        /// <summary>
+        /// Performs an action on the entity before writing (create or update).
+        /// </summary>
+        /// <param name="entity">The entity to work on.</param>
+        /// <param name="newRecord">Value indicating whether the record is new or not.</param>
+        protected virtual void BeforeWrite(TEntity entity, bool newRecord = false)
+        {
+            entity.UpdatedAt = DateTime.Now;
+            if (newRecord)
+            {
+                entity.CreatedAt = entity.CreatedAt == null ? DateTime.Now : entity.CreatedAt;
+            }
+        }
     }
 }

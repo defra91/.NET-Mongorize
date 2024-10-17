@@ -8,16 +8,21 @@ namespace Mongorize.Builders
     using Mongorize.Entities;
     using Mongorize.Models;
     using Mongorize.Models.Enums;
-    using Mongorize.Models.Interfaces;
 
     /// <summary>
     /// Represents the builder object used for building <see cref="QueryOptions{TEntity}"/> objects.
     /// </summary>
     /// <typeparam name="TEntity">The type to work with.</typeparam>
-    public class QueryOptionsBuilder<TEntity>
+    public class QueryOptionsBuilder<TEntity> : QueryFiltersOptionsBuilder<TEntity, QueryOptions<TEntity>>
         where TEntity : BaseEntity
     {
-        private readonly QueryOptions<TEntity> queryOptions = new QueryOptions<TEntity>();
+        /// <summary>
+        /// Initializes a new instance of the <see cref="QueryOptionsBuilder{TEntity}"/> class.
+        /// </summary>
+        public QueryOptionsBuilder()
+            : base(new QueryOptions<TEntity>())
+        {
+        }
 
         /// <summary>
         /// Specify the pagination parameters for the query.
@@ -27,18 +32,7 @@ namespace Mongorize.Builders
         /// <returns>The current <see cref="QueryOptionsBuilder{TEntity}"/> instance for method chaining.</returns>
         public QueryOptionsBuilder<TEntity> WithPagination(int pageNumber, int itemsPerPage)
         {
-            this.queryOptions.Pagination = new Pagination { Page = pageNumber, ItemsPerPage = itemsPerPage };
-            return this;
-        }
-
-        /// <summary>
-        /// Applies filtering conditions to the query based on the provided filter object.
-        /// </summary>
-        /// <param name="filters">An instance of <see cref="IFilter{TEntity}"/> to filter the results.</param>
-        /// <returns>The current <see cref="QueryOptionsBuilder{TEntity}"/> instance for method chaining.</returns>
-        public QueryOptionsBuilder<TEntity> WithFilters(IFilter<TEntity> filters)
-        {
-            this.queryOptions.Filters = filters;
+            this.QueryOptions.Pagination = new Pagination { Page = pageNumber, ItemsPerPage = itemsPerPage };
             return this;
         }
 
@@ -49,7 +43,7 @@ namespace Mongorize.Builders
         /// <returns>The current <see cref="QueryOptionsBuilder{TEntity}"/> instance for method chaining.</returns>
         public QueryOptionsBuilder<TEntity> Include(Expression<Func<TEntity, object>> includeProjection)
         {
-            this.queryOptions.IncludeProjections.Add(includeProjection);
+            this.QueryOptions.IncludeProjections.Add(includeProjection);
             return this;
         }
 
@@ -60,7 +54,7 @@ namespace Mongorize.Builders
         /// <returns>The current <see cref="QueryOptionsBuilder{TEntity}"/> instance for method chaining.</returns>
         public QueryOptionsBuilder<TEntity> Exclude(Expression<Func<TEntity, object>> excludeProjection)
         {
-            this.queryOptions.ExcludeProjections.Add(excludeProjection);
+            this.QueryOptions.ExcludeProjections.Add(excludeProjection);
             return this;
         }
 
@@ -72,16 +66,8 @@ namespace Mongorize.Builders
         /// <returns>The current <see cref="QueryOptionsBuilder{TEntity}"/> instance for method chaining.</returns>
         public QueryOptionsBuilder<TEntity> WithSorting(Expression<Func<TEntity, object>> sortBy, ESortByDirection direction)
         {
-            this.queryOptions.SortCriteria.Add((sortBy, direction));
+            this.QueryOptions.SortCriteria.Add((sortBy, direction));
             return this;
         }
-
-        /// <summary>
-        /// Builds and returns the configured <see cref="QueryOptions{TEntity}"/> object
-        /// with all the specified query parameters.
-        /// </summary>
-        /// <returns>A <see cref="QueryOptions{TEntity}"/> instance containing the query options.</returns>
-        public QueryOptions<TEntity> Build()
-            => this.queryOptions;
     }
 }
