@@ -30,7 +30,7 @@ namespace Mongorize.Repositories
         private readonly IMongoCollection<TEntity> dbCollection = context.GetCollection<TEntity>();
 
         /// <inheritdoc />
-        public Task<TEntity> GetById(string id, CancellationToken cToken)
+        public Task<TEntity> GetByIdAsync(string id, CancellationToken cToken)
         {
             ArgumentNullException.ThrowIfNull(id);
 
@@ -45,7 +45,7 @@ namespace Mongorize.Repositories
         }
 
         /// <inheritdoc />
-        public Task<List<TEntity>> GetList(QueryOptions<TEntity> options, CancellationToken cToken)
+        public Task<List<TEntity>> GetListAsync(QueryOptions<TEntity> options, CancellationToken cToken)
         {
             var combinedFilter = GetCombinedFilter(options);
 
@@ -69,7 +69,7 @@ namespace Mongorize.Repositories
         }
 
         /// <inheritdoc />
-        public Task<long> Count(QueryFiltersOptions<TEntity> options, CancellationToken cToken)
+        public Task<long> CountAsync(QueryFiltersOptions<TEntity> options, CancellationToken cToken)
         {
             var combinedFilter = GetCombinedFilter(options);
 
@@ -77,7 +77,7 @@ namespace Mongorize.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<TEntity> Create(TEntity entity, CancellationToken cToken)
+        public async Task<TEntity> CreateAsync(TEntity entity, CancellationToken cToken)
         {
             if (entity == null)
             {
@@ -90,7 +90,7 @@ namespace Mongorize.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<List<TEntity>> CreateRange(List<TEntity> list, CancellationToken cToken)
+        public async Task<List<TEntity>> CreateRangeAsync(List<TEntity> list, CancellationToken cToken)
         {
             if (list?.Count <= 0)
             {
@@ -107,16 +107,16 @@ namespace Mongorize.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task<TEntity> Update(TEntity entity, CancellationToken cToken)
+        public async Task<TEntity> UpdateOneAsync(TEntity entity, CancellationToken cToken)
         {
             this.BeforeWrite(entity, newRecord: false);
             await this.dbCollection.ReplaceOneAsync(x => x.Id == entity.Id, entity, new ReplaceOptions() { }, cToken);
 
-            return await this.GetById(entity.Id, cToken);
+            return await this.GetByIdAsync(entity.Id, cToken);
         }
 
         /// <inheritdoc/>
-        public async Task<long> UpdateMultipleFieldsAsync(
+        public async Task<long> SetFieldsAsync(
         QueryFiltersOptions<TEntity> options,
         Dictionary<Expression<Func<TEntity, object>>, object> updateDict,
         CancellationToken cToken)
@@ -147,7 +147,7 @@ namespace Mongorize.Repositories
         }
 
          /// <inheritdoc />
-        public Task<TEntity> FindOne(QueryOptions<TEntity> options, CancellationToken cToken)
+        public Task<TEntity> FindOneAsync(QueryOptions<TEntity> options, CancellationToken cToken)
         {
             var combinedFilter = GetCombinedFilter(options);
 
@@ -163,14 +163,14 @@ namespace Mongorize.Repositories
         }
 
         /// <inheritdoc />
-        public async Task<long> RemoveById(string id, CancellationToken cToken)
+        public async Task<long> RemoveByIdAsync(string id, CancellationToken cToken)
         {
             DeleteResult deleteResult = await this.dbCollection.DeleteOneAsync(x => x.Id == id, cToken);
             return deleteResult.DeletedCount;
         }
 
         /// <inheritdoc />
-        public async Task<long> RemoveMany(QueryFiltersOptions<TEntity> options, CancellationToken cToken)
+        public async Task<long> RemoveManyAsync(QueryFiltersOptions<TEntity> options, CancellationToken cToken)
         {
             var combinedFilter = GetCombinedFilter(options);
 

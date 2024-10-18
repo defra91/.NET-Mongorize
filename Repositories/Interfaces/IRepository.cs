@@ -23,7 +23,7 @@ public interface IRepository<TEntity>
     /// <param name="cToken">The cancellation token.</param>
     /// <returns>The <see cref="Task"/> that contains the found entity or null if not founds.</returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="id"/> is null.</exception>
-    public Task<TEntity> GetById(string id, CancellationToken cToken);
+    public Task<TEntity> GetByIdAsync(string id, CancellationToken cToken);
 
     /// <summary>
     /// Returns a list of entity fetched from database. Fetch is made with parameters contained on
@@ -33,7 +33,7 @@ public interface IRepository<TEntity>
     /// all the parameters used for building the query.</param>
     /// <param name="cToken">The cancellation token used to cancel the async operation.</param>
     /// <returns>The list of entities found with the given filters and pagination.</returns>
-    public Task<List<TEntity>> GetList(QueryOptions<TEntity> options, CancellationToken cToken);
+    public Task<List<TEntity>> GetListAsync(QueryOptions<TEntity> options, CancellationToken cToken);
 
     /// <summary>
     /// Returns the count of entities fetched from database. Fetch is made with parameters contained on
@@ -43,7 +43,7 @@ public interface IRepository<TEntity>
     /// all the parameters used for building the count query.</param>
     /// <param name="cToken">The cancellation token used to cancel the async operation.</param>
     /// <returns>The count of entities found with the given <paramef name="options" />.</returns>
-    public Task<long> Count(QueryFiltersOptions<TEntity> options, CancellationToken cToken);
+    public Task<long> CountAsync(QueryFiltersOptions<TEntity> options, CancellationToken cToken);
 
     /// <summary>
     /// Creates a new entity on database.
@@ -51,7 +51,7 @@ public interface IRepository<TEntity>
     /// <param name="entity">The entity object to create.</param>
     /// <param name="cToken">The cancellation token.</param>
     /// <returns>The created entity with its id.</returns>
-    public Task<TEntity> Create(TEntity entity, CancellationToken cToken);
+    public Task<TEntity> CreateAsync(TEntity entity, CancellationToken cToken);
 
     /// <summary>
     /// Creates a range of entities on database.
@@ -59,7 +59,7 @@ public interface IRepository<TEntity>
     /// <param name="list">The list of entities.</param>
     /// <param name="cToken">The cancellation token.</param>
     /// <returns>The list of created entities.</returns>
-    public Task<List<TEntity>> CreateRange(List<TEntity> list, CancellationToken cToken);
+    public Task<List<TEntity>> CreateRangeAsync(List<TEntity> list, CancellationToken cToken);
 
     /// <summary>
     /// Update an existing entity on database identified by its id.
@@ -67,7 +67,7 @@ public interface IRepository<TEntity>
     /// <param name="entity">The entity object.</param>
     /// <param name="cToken">The cancellation token.</param>
     /// <returns>Task containing the updated entity.</returns>
-    public Task<TEntity> Update(TEntity entity, CancellationToken cToken);
+    public Task<TEntity> UpdateOneAsync(TEntity entity, CancellationToken cToken);
 
     /// <summary>
     /// Given a query filters options and a dictionary containing
@@ -78,7 +78,7 @@ public interface IRepository<TEntity>
     /// <param name="updateDict">The update dictionary.</param>
     /// <param name="cToken">The cancellation token.</param>
     /// <returns>The count of updated entities.</returns>
-    public Task<long> UpdateMultipleFieldsAsync(
+    public Task<long> SetFieldsAsync(
         QueryFiltersOptions<TEntity> options,
         Dictionary<Expression<Func<TEntity, object>>, object> updateDict,
         CancellationToken cToken);
@@ -89,7 +89,7 @@ public interface IRepository<TEntity>
     /// <param name="options">The query options object.</param>
     /// <param name="cToken">The cancellation token.</param>
     /// <returns>The found entity or null if the entity has not been found.</returns>
-    public Task<TEntity> FindOne(QueryOptions<TEntity> options, CancellationToken cToken);
+    public Task<TEntity> FindOneAsync(QueryOptions<TEntity> options, CancellationToken cToken);
 
     /// <summary>
     /// Removes an existing entity by its id.
@@ -97,7 +97,7 @@ public interface IRepository<TEntity>
     /// <param name="id">The id of the entity.</param>
     /// <param name="cToken">The cancellation token.</param>
     /// <returns>The completed task containing the number of deleted elements.</returns>
-    public Task<long> RemoveById(string id, CancellationToken cToken);
+    public Task<long> RemoveByIdAsync(string id, CancellationToken cToken);
 
     /// <summary>
     /// Remove many entities by the provided query filters options.
@@ -105,5 +105,5 @@ public interface IRepository<TEntity>
     /// <param name="options">The query filters options.</param>
     /// <param name="cToken">The cancellation token.</param>
     /// <returns>The amount of removed items.</returns>
-    public Task<long> RemoveMany(QueryFiltersOptions<TEntity> options, CancellationToken cToken);
+    public Task<long> RemoveManyAsync(QueryFiltersOptions<TEntity> options, CancellationToken cToken);
 }
