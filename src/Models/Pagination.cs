@@ -5,7 +5,7 @@
 namespace Mongorize.Models;
 
 /// <summary>
-/// Represente an object responsible of collecting the necessary data to apply the pagination logic.
+/// Represents an object responsible of collecting the necessary data to apply the pagination logic.
 /// </summary>
 public class Pagination
 {

@@ -31,7 +31,7 @@ public interface IBaseService<TEntity>
     /// <param name="pagination">The <see cref="Pagination"/> object.</param>
     /// <param name="filters">The filters object.</param>
     /// <param name="sortBy">The sortBy tuple that contains the field name and the direction.</param>
-    /// <param name="cToken">Cancellation token used to cancel the asunc operation.</param>
+    /// <param name="cToken">Cancellation token used to cancel the async operation.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the list of entities.</returns>
     public Task<List<TEntity>> GetListAsync(
         Pagination pagination = null,

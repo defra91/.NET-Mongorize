@@ -42,7 +42,7 @@ public interface IRepository<TEntity>
     /// <param name="options">An object of type <see cref="QueryFiltersOptions{TEntity}"/> that contains
     /// all the parameters used for building the count query.</param>
     /// <param name="cToken">The cancellation token used to cancel the async operation.</param>
-    /// <returns>The count of entities found with the given <paramef name="options" />.</returns>
+    /// <returns>The count of entities found with the given <paramref name="options" />.</returns>
     public Task<long> CountAsync(QueryFiltersOptions<TEntity> options, CancellationToken cToken);
 
     /// <summary>
