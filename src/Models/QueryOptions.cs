@@ -9,7 +9,7 @@ using Mongorize.Entities;
 using Mongorize.Models.Enums;
 
 /// <summary>
-/// Represents an object container for bulding a query related to the
+/// Represents an object container for building a query related to the
 /// provided type param.
 /// </summary>
 /// <typeparam name="TEntity">The entity to work with.</typeparam>
