@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mongorize", "mongorize.csproj", "{3B3E0457-A5A8-4899-9464-89915FE187DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mongorize", "src\Mongorize.csproj", "{3B3E0457-A5A8-4899-9464-89915FE187DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mongorize.Demo", "demo\Mongorize.Demo.csproj", "{A250AA81-1487-4CF7-BAFF-E5D7DB86D476}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{3B3E0457-A5A8-4899-9464-89915FE187DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B3E0457-A5A8-4899-9464-89915FE187DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B3E0457-A5A8-4899-9464-89915FE187DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A250AA81-1487-4CF7-BAFF-E5D7DB86D476}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A250AA81-1487-4CF7-BAFF-E5D7DB86D476}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A250AA81-1487-4CF7-BAFF-E5D7DB86D476}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A250AA81-1487-4CF7-BAFF-E5D7DB86D476}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
