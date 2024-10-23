@@ -2,7 +2,6 @@ namespace Mongorize.Tests.Repositories;
 
 using MongoDB.Driver;
 using Mongorize.Contexts.Interfaces;
-using Mongorize.Repositories;
 using Mongorize.Tests.Entities;
 using Xunit;
 using Moq;
@@ -13,6 +12,7 @@ using System.Collections.Generic;
 using Mongorize.Repositories.Interfaces;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using Mongorize.Builders;
 
 public class BaseRepositoryTests
 {
@@ -167,5 +167,42 @@ public class BaseRepositoryTests
 
         // Act & Assert
         await Assert.ThrowsAsync<FormatException>(() => this.repository.GetByIdAsync(invalidId, cToken));
+    }
+
+    [Fact]
+    public async Task GetListAsync_ShouldReturnTheListOfEntities()
+    {
+        // Arrange
+        var options = new QueryOptionsBuilder<TestEntity>()
+            .WithPagination(1, 10)
+            .Build();
+
+        var entities = new List<TestEntity>
+        {
+            new () { Id = ObjectId.GenerateNewId().ToString(), Name = "test1", },
+            new () { Id = ObjectId.GenerateNewId().ToString(), Name = "test2", },
+        };
+        var cToken = new CancellationToken();
+
+        var cursorMock = new Mock<IAsyncCursor<TestEntity>>();
+        cursorMock.SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true)
+            .ReturnsAsync(false);
+        cursorMock.SetupGet(_ => _.Current).Returns(entities);
+
+        this.collectionMock.Setup(c => c.FindAsync(
+            It.IsAny<FilterDefinition<TestEntity>>(),
+            It.IsAny<FindOptions<TestEntity, TestEntity>>(),
+            It.IsAny<CancellationToken>()))
+        .ReturnsAsync(cursorMock.Object);
+
+        // Act
+        var result = await this.repository.GetListAsync(options, cToken);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+        Assert.Equal("test1", result[0].Name);
+        Assert.Equal("test2", result[1].Name);
     }
 }
