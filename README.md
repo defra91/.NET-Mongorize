@@ -24,7 +24,7 @@ The authors of this project strongly believe in these principles as the foundati
 
 Clone the repository.
 
-```bash
+``` bash
 git clone https://github.com/defra91/.NET-Mongorize.git
 ```
 
@@ -32,15 +32,15 @@ git clone https://github.com/defra91/.NET-Mongorize.git
 
 Navigate to the Dockerfile for the compilation of the build image for the library.
 
-```bash
-cd .NET-Mongorize/src
+``` bash
+cd src
 ```
 
 #### Step 3
 
 Build the Docker image based on the located docker file.
 
-```bash
+``` bash
 docker build -t dotnet-mongorize-compiler-image .
 ```
 
@@ -48,7 +48,7 @@ docker build -t dotnet-mongorize-compiler-image .
 
 Run the Docker container based on the compiled image.
 
-```bash
+``` bash
 docker run --name dotnet-mongorize-compiler-container  dotnet-mongorize-compiler-image
 ```
 
@@ -60,7 +60,7 @@ Inside the `Demo` folder, you can find an example project that showcases how to 
 
 Navigate to the demo folder.
 
-```bash
+``` bash
 cd .NET-mongorize/demo
 ```
 
@@ -68,17 +68,17 @@ cd .NET-mongorize/demo
 
 Compile the demo project.
 
-```bash
+``` bash
 dotnet build
 ```
 
 ### Step 3
 
-Create the `appsettings.json` file containing the mongo db configuration.
+Create the `appsettings.json` file containing the mongo db configuration and place it inside the compiled demo project location (`.NET-mongorize/demo/bin/Debug/net8.0/appsettings.json`).
 
 **here an example:**
 
-```json
+``` json
 {
     "MongoSettings": {
         "Connection": "mongodb://localhost:27017",
@@ -92,7 +92,7 @@ Create the `appsettings.json` file containing the mongo db configuration.
 
 Run the demo project.
 
-```bash
+``` bash
 dotnet run
 ```
 
