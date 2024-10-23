@@ -14,10 +14,10 @@ namespace Mongorize.Contexts
     using Mongorize.Settings;
 
     /// <summary>
-    /// Represents the base abstract MongoDb context that initializes and provide
+    /// Represents the base MongoDb context that initializes and provide
     /// the way to connect to the database.
     /// </summary>
-    public abstract class MongoContext : IMongoContext
+    public class MongoContext : IMongoContext
     {
         private readonly IMongoDatabase database;
 
