@@ -10,13 +10,16 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 using System.Collections.Generic;
+using Mongorize.Repositories.Interfaces;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 
 public class BaseRepositoryTests
 {
     private readonly Mock<IMongoContext> contextMock;
     private readonly Mock<IMongoCollection<TestEntity>> collectionMock;
 
-    private readonly BaseRepository<TestEntity> repository;
+    private readonly IRepository<TestEntity> repository;
 
     public BaseRepositoryTests()
     {
@@ -87,5 +90,82 @@ public class BaseRepositoryTests
         var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => this.repository.CreateRangeAsync(emptyList, CancellationToken.None));
 
         Assert.Equal("TestEntity list is empty", exception.ParamName);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnTheEntity()
+    {
+        // Arrange
+        var expectedObjectId = ObjectId.GenerateNewId().ToString();
+        var testEntity = new TestEntity { Id = expectedObjectId };
+
+        var cToken = new CancellationToken();
+
+        var cursorMock = new Mock<IAsyncCursor<TestEntity>>();
+        cursorMock.Setup(c => c.Current).Returns(new List<TestEntity> { testEntity });
+        cursorMock
+            .SetupSequence(c => c.MoveNextAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true)
+            .ReturnsAsync(false);
+
+        var serializer = BsonSerializer.SerializerRegistry.GetSerializer<TestEntity>();
+        var renderArgs = new RenderArgs<TestEntity>(serializer, BsonSerializer.SerializerRegistry);
+
+        this.collectionMock
+            .Setup(c => c.FindAsync(
+                It.Is<FilterDefinition<TestEntity>>(f =>
+                    f.Render(renderArgs).ToString().Contains(expectedObjectId)),
+                It.IsAny<FindOptions<TestEntity, TestEntity>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(cursorMock.Object);
+
+        // Act
+        var result = await this.repository.GetByIdAsync(testEntity.Id, cToken);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(testEntity.Id, result.Id);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnNullIfNotFound()
+    {
+         // Arrange
+        var invalidObjectId = ObjectId.GenerateNewId().ToString();
+
+        var cursorMock = new Mock<IAsyncCursor<TestEntity>>();
+
+        cursorMock.SetupSequence(x => x.MoveNextAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false); // Nessun risultato trovato
+
+        cursorMock.Setup(x => x.Current).Returns(new List<TestEntity>()); // Lista vuota
+
+        var serializer = BsonSerializer.SerializerRegistry.GetSerializer<TestEntity>();
+        var renderArgs = new RenderArgs<TestEntity>(serializer, BsonSerializer.SerializerRegistry);
+
+        this.collectionMock
+            .Setup(c => c.FindAsync(
+                It.Is<FilterDefinition<TestEntity>>(f =>
+                    f.Render(renderArgs).ToString().Contains(invalidObjectId)),
+                It.IsAny<FindOptions<TestEntity, TestEntity>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(cursorMock.Object);
+
+        // Act
+        var result = await this.repository.GetByIdAsync(invalidObjectId, CancellationToken.None);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ShouldThrowFormatException_WhenInvalidIdFormat()
+    {
+        // Arrange
+        var invalidId = "invalid_object_id";
+        var cToken = new CancellationToken();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<FormatException>(() => this.repository.GetByIdAsync(invalidId, cToken));
     }
 }

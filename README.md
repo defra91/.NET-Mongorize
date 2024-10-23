@@ -23,3 +23,7 @@ Inside the `Demo` folder, you can find an example project that showcases how to 
 ## Dockerfile
 
 The project provides a `Dockerfile`, which is responsible for building the image used to compile the library. The image's sole purpose is to compile the library, so it can be integrated into a continuous integration pipeline.
+
+## Unit tests
+
+On the folder `test` you will find the collection of all the unit tests that have been written for the library.
