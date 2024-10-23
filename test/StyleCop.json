@@ -1,0 +1,19 @@
+{
+    "settings": {
+      "documentationRules": {
+        "companyName": "Luca De Franceschi",
+        "documentationCulture": "en-US",
+        "xmlHeader": false
+      },
+      "namingRules": {
+        "allowCommonHungarianPrefixes": true
+      },
+      "orderingRules": {
+        "systemUsingDirectivesFirst": false
+      },
+      "rules": {
+        "SA1600": { "enabled": false },
+        "SA1633": { "enabled": false }
+      }
+    }
+}

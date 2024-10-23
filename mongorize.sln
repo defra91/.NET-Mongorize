@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mongorize", "src\Mongorize.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mongorize.Demo", "demo\Mongorize.Demo.csproj", "{A250AA81-1487-4CF7-BAFF-E5D7DB86D476}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mongorize.Tests", "test\Mongorize.Tests.csproj", "{46FDA8F3-6CD6-41D8-AEA7-D02874F2E7A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A250AA81-1487-4CF7-BAFF-E5D7DB86D476}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A250AA81-1487-4CF7-BAFF-E5D7DB86D476}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A250AA81-1487-4CF7-BAFF-E5D7DB86D476}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46FDA8F3-6CD6-41D8-AEA7-D02874F2E7A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46FDA8F3-6CD6-41D8-AEA7-D02874F2E7A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46FDA8F3-6CD6-41D8-AEA7-D02874F2E7A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46FDA8F3-6CD6-41D8-AEA7-D02874F2E7A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
