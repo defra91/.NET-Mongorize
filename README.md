@@ -18,7 +18,83 @@ The authors of this project strongly believe in these principles as the foundati
 
 ## Getting Started
 
+### Compile the library
+
+#### Step 1
+
+Clone the repository.
+
+``` bash
+git clone https://github.com/defra91/.NET-Mongorize.git
+```
+
+#### Step 2
+
+Navigate to the Dockerfile for the compilation of the build image for the library.
+
+``` bash
+cd src
+```
+
+#### Step 3
+
+Build the Docker image based on the located docker file.
+
+``` bash
+docker build -t dotnet-mongorize-compiler-image .
+```
+
+#### Step 4
+
+Run the Docker container based on the compiled image.
+
+``` bash
+docker run --name dotnet-mongorize-compiler-container  dotnet-mongorize-compiler-image
+```
+
+### Run the demo project
+
 Inside the `Demo` folder, you can find an example project that showcases how to use all the features of the **Mongorize** library, starting with well-defined sample entities.
+
+#### Step 1
+
+Navigate to the demo folder.
+
+``` bash
+cd .NET-mongorize/demo
+```
+
+#### Step 2
+
+Compile the demo project.
+
+``` bash
+dotnet build
+```
+
+### Step 3
+
+Create the `appsettings.json` file containing the mongo db configuration and place it inside the compiled demo project location (`.NET-mongorize/demo/bin/Debug/net8.0/appsettings.json`).
+
+**here an example:**
+
+``` json
+{
+    "MongoSettings": {
+        "Connection": "mongodb://localhost:27017",
+        "DatabaseName": "my-awesome-database",
+        "LogQueries": true
+    }
+}
+```
+
+#### Step 4
+
+Run the demo project.
+
+``` bash
+dotnet run
+```
 
 ## Dockerfile
 
